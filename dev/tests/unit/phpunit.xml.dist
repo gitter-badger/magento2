@@ -14,6 +14,7 @@
     </testsuite>
     <php>
         <ini name="date.timezone" value="America/Los_Angeles"/>
+        <ini name="error_reporting" value="32757"/>
     </php>
     <filter>
         <whitelist addUncoveredFilesFromWhiteList="true">
