@@ -19,7 +19,7 @@ run_tests() {
     id=$(( $2 - 1 ))
     echo -e "\nRunning ${dir} tests"
     FOLDER=$(echo $dir | cut -d'/' -f4)
-    RESULT="--stderr -c ${BASE_DIR}/dev/tests/integration/phpunit-${id}.xml --log-junit ${BASE_DIR}/integration_tests_${FOLDER}.xml"
+    RESULT="-c ${BASE_DIR}/dev/tests/integration/phpunit-${id}.xml --log-junit ${BASE_DIR}/integration_tests_${FOLDER}.xml"
     fl="/tmp/_test_${id}.log"
     echo -e "\n $PHPUNIT_COMMAND $RESULT $dir \n"
     cat ./etc/install-config-mysql-${id}.php | grep db_name
