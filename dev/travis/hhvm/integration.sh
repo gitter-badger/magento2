@@ -13,6 +13,8 @@ for (( i=0; i<$MAX_INSTANCE; i++ )); do
     mysql -uroot -e"create database magento_integration_tests_${i};"
 done
 rm -f ./phpunit.xml.dist
+cat ./phpunit-1.xml
+exit 0
 
 run_tests() {
     dir=$1
