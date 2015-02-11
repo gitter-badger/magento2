@@ -29,6 +29,7 @@ run_tests() {
 
 export -f run_tests
 ls -dX ./testsuite/Magento/* | grep -v _files | $BASE_DIR/dev/travis/parallel --nn --gnu -P $MAX_INSTANCE 'run_tests {} {%}' || exit 1
+ls -l ./tmp/
 
 unset -f run_tests
 unset MAX_INSTANCES
