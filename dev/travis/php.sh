@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PATH=$PATH:/home/travis/.phpenv/bin/phpenv
-echo 'sendmail_path = "/usr/sbin/sendmail -t -i "' | sudo tee "/home/travis/.phpenv/versions/$(phpenv version-name)/etc/conf.d/sendmail.ini"
-echo '' > ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
-echo 'memory_limit = -1' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+version=$(phpenv version-name)
+echo 'sendmail_path = "/usr/sbin/sendmail -t -i "' | sudo tee "/home/travis/.phpenv/versions/${version}/etc/conf.d/sendmail.ini"
+echo '' > ~/.phpenv/versions/${version}/etc/conf.d/xdebug.ini
+echo 'memory_limit = -1' >> ~/.phpenv/versions/${version}/etc/conf.d/travis.ini
