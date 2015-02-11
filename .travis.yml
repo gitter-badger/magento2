@@ -53,7 +53,8 @@ before_install:
   - composer self-update
   - chmod a+x $TRAVIS_BUILD_DIR/dev/travis/parallel
 before_script:
-  - export TRAVIS_PHP_VERSION
+  - echo $TRAVIS_PHP_VERSION
+  - export TRAVIS_PHP_VERSION=$TRAVIS_PHP_VERSION
   # Mock mail
   - sudo service postfix stop
   - smtp-sink -d "%d.%H.%M.%S" localhost:2500 1000 &
