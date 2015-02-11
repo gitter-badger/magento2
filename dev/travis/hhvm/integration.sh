@@ -21,6 +21,9 @@ run_tests() {
     RESULT="--stderr -c ${BASE_DIR}/dev/tests/integration/phpunit-${id}.xml --log-junit ${BASE_DIR}/integration_tests_${FOLDER}.xml"
     fl="/tmp/_test_${id}.log"
     echo -e "\n $PHPUNIT_COMMAND $RESULT $dir \n"
+    cat ./etc/install-config-mysql-${id}.php | grep db_name
+    cat ./phpunit-${id}.xml | grep TESTS_PARALLEL_THREAD
+    echo ""
     $PHPUNIT_COMMAND $RESULT $dir | tee $fl
     ls -l ./tmp/
     cat $fl | grep -i -e fatal -e error > /dev/null && exit 1
