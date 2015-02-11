@@ -19,7 +19,8 @@ run_tests() {
     echo -e "\nRunning ${dir} tests"
     FOLDER=$(echo $dir | cut -d'/' -f4)
     RESULT="--stderr -c ${BASE_DIR}/dev/tests/integration/phpunit-${id}.xml --log-junit ${BASE_DIR}/integration_tests_${FOLDER}.xml"
-    cat ${BASE_DIR}/dev/tests/integration/phpunit-${id}.xml | grep TESTS_INSTALL_CONFIG_FILE
+    cat ${BASE_DIR}/dev/tests/integration/phpunit-${id}.xml | grep TESTS_PARALLEL_THREAD
+    exit 0
     fl="/tmp/_test_${id}.log"
     echo -e "\n $PHPUNIT_COMMAND $RESULT $dir \n"
     $PHPUNIT_COMMAND $RESULT $dir | tee $fl
@@ -29,6 +30,8 @@ run_tests() {
 
 export -f run_tests
 ls -dX ./testsuite/Magento/* | grep -v _files | $BASE_DIR/dev/travis/parallel --nn --gnu -P $MAX_INSTANCE 'run_tests {} {%}' || exit 1
+
+
 ls -l ./tmp/
 
 unset -f run_tests
