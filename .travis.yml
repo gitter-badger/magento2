@@ -62,6 +62,7 @@ before_script:
   # Create DB for Integration tests
   - if [[ "$NEED_DB" == "true" ]]; then mysql -e 'create database magento_integration_tests;'; mv dev/tests/integration/etc/install-config-mysql.travis.php.dist dev/tests/integration/etc/install-config-mysql.php; fi
   - bash -c "if [ '$TEST_SUITE' == 'static_phpcs' ] || [ '$TEST_SUITE' == 'static_annotation' ]; then composer global require "squizlabs/php_codesniffer=1.5.2"; fi"
+  - export PHPENV_VERSION=$(phpenv version-name)
   - bash -c "if [ '$TRAVIS_PHP_VERSION' == 'hhvm' ]; then sudo bash $TRAVIS_BUILD_DIR/dev/travis/hhvm.sh; fi;"
   - bash -c "if [ '$TRAVIS_PHP_VERSION' != 'hhvm' ]; then sudo bash $TRAVIS_BUILD_DIR/dev/travis/php.sh; fi;"
   - phpenv rehash;
