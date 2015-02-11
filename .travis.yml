@@ -1,12 +1,12 @@
 language: php
 php:
-  - 5.5
+#  - 5.5
 #  - 5.6
   - hhvm
 #  - hhvm-nightly
 env:
   matrix:
-    - TEST_SUITE=unit NEED_DB=false
+#    - TEST_SUITE=unit NEED_DB=false
     - TEST_SUITE=integration NEED_DB=true
 #  - TEST_SUITE=integration_integrity NEED_DB=true
 #  - TEST_SUITE=static_phpcs NEED_DB=false
