@@ -7,7 +7,7 @@ export PHPUNIT_COMMAND=$1
 cd $BASE_DIR/dev/tests/integration
 for (( i=0; i<$MAX_INSTANCE; i++ )); do
     cat ./phpunit.xml.dist \
-    | sed 's#TESTS_PARALLEL_THREAD" "value="0#TESTS_PARALLEL_THREAD" "value="'$i'#' \
+    | sed 's#TESTS_PARALLEL_THREAD" value="0#TESTS_PARALLEL_THREAD" value="'$i'#' \
     | sed "s#etc/install-config-mysql.php#etc/install-config-mysql-${i}.php#" > ./phpunit-${i}.xml
     cat ./etc/install-config-mysql.php | sed "s#magento_integration_tests#magento_integration_tests_${i}#" > ./etc/install-config-mysql-${i}.php
     mysql -uroot -e"create database magento_integration_tests_${i};"
