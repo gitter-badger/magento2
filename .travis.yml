@@ -1,15 +1,3 @@
-  # Static tests [Code Style]
-  - bash -c "if [ '$TEST_SUITE' == 'static_phpcs' ]; then cd dev/tests/static; $TRAVIS_BUILD_DIR/vendor/bin/phpunit -c phpunit.xml.dist --filter 'Magento\\\\Test\\\\Php\\\\LiveCodeTest::testCodeStyle'; fi"
-  # Static tests [Code Style]
-  - bash -c "if [ '$TEST_SUITE' == 'static_annotation' ]; then cd dev/tests/static; $TRAVIS_BUILD_DIR/vendor/bin/phpunit -c phpunit.xml.dist --filter 'Magento\\\\Test\\\\Php\\\\LiveCodeTest::testAnnotationStandard'; fi"
-  - bash -c "if [ '$TEST_SUITE' == 'functional' ];  then ./vendor/bin/phpunit -c $TRAVIS_BUILD_DIR/dev/tests/functional/phpunit.xml; fi"
-  - bash -c "if [ '$TEST_SUITE' == 'functional' ];  then sudo bash $TRAVIS_BUILD_DIR/dev/travis/archive.sh; fi"
-  - bash -c "if [ '$TEST_SUITE_UNIT' == 'unit_02' ]; then tar czfP /tmp/travis_${TRAVIS_JOB_NUMBER}_${TRAVIS_BUILD_ID}.tar.gz /tmp/unit.json /tmp/unit.html; fi;"
-  - export SCP_CMD=$(echo $SCP_CMD | base64 -d);
-after_failure:
-  - openssl aes-256-cbc -K $encrypted_44c7ceb3bfc1_key -iv $encrypted_44c7ceb3bfc1_iv -in travis.enc -out .\/travis -d
-  - chmod 0400 ./travis
-  - bash -c "if [ -f /tmp/travis_${TRAVIS_JOB_NUMBER}_${TRAVIS_BUILD_ID}.tar.gz ] && [ -n $SCP_CMD ]; then scp $SCP_CMD; fi"
 language: php
 php:
   - 5.5
