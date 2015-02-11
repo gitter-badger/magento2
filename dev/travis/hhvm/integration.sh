@@ -5,7 +5,6 @@ export BASE_DIR=$TRAVIS_BUILD_DIR
 export PHPUNIT_COMMAND=$1
 
 cd $BASE_DIR/dev/tests/integration
-ls -1 ./etc/
 for (( i=0; i<$MAX_INSTANCE; i++ )); do
     cat ./phpunit.xml.dist \
     | sed 's#</php>#    <const name="TESTS_PARALLEL_THREAD" value="${i}"/>\n    </php>#' \
@@ -13,6 +12,8 @@ for (( i=0; i<$MAX_INSTANCE; i++ )); do
     cat ./etc/install-config-mysql.php.dist | sed 's#magento_integration_tests#magento_integration_tests_${i}#' > ./etc/install-config-mysql-${i}.php
     mysql -uroot -e"create database magento_integration_tests_${i};"
 done
+ls -1 ./etc/
+ls -1 ./
 
 run_tests() {
     dir=$1
