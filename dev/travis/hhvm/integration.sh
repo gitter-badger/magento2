@@ -12,6 +12,9 @@ for (( i=0; i<$MAX_INSTANCE; i++ )); do
     cat ./etc/install-config-mysql.php | sed "s#magento_integration_tests#magento_integration_tests_${i}#" > ./etc/install-config-mysql-${i}.php
     mysql -uroot -e"create database magento_integration_tests_${i};"
 done
+cat ./phpunit-1.xml
+cat ./etc/install-config-mysql-1.php
+exit 0
 
 run_tests() {
     dir=$1
