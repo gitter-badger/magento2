@@ -4,7 +4,7 @@ export MAX_INSTANCE=4
 export BASE_DIR=$TRAVIS_BUILD_DIR
 export PHPUNIT_COMMAND=$1
 
-cd $TRAVIS_BUILD_DIR/dev/tests/integration
+cd $BASE_DIR/dev/tests/integration
 for (( i=0; i<$MAX_INSTANCE; i++ )); do
     cat ./phpunit.xml.dist \
     | sed 's#</php>#    <const name="TESTS_PARALLEL_THREAD" value="${i}"/>\n    </php>#' \
@@ -26,7 +26,7 @@ run_tests() {
 }
 
 export -f run_tests
-ls -dX ./testsuite/Magento/* | grep -v _files | parallel --gnu -P $MAX_INSTANCE 'run_tests {} {%}' || exit 1
+ls -dX ./testsuite/Magento/* | grep -v _files | $BASE_DIR/dev/travis/parallel --gnu -P $MAX_INSTANCE 'run_tests {} {%}' || exit 1
 
 unset -f run_tests
 unset MAX_INSTANCES
