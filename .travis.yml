@@ -52,6 +52,7 @@ before_install:
 #  - sudo updatedb
   - composer self-update
   - chmod a+x $TRAVIS_BUILD_DIR/dev/travis/parallel
+  - mysql --version
 before_script:
   # Mock mail
   - sudo service postfix stop
