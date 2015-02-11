@@ -1,58 +1,97 @@
+  # Static tests [Code Style]
+  - bash -c "if [ '$TEST_SUITE' == 'static_phpcs' ]; then cd dev/tests/static; $TRAVIS_BUILD_DIR/vendor/bin/phpunit -c phpunit.xml.dist --filter 'Magento\\\\Test\\\\Php\\\\LiveCodeTest::testCodeStyle'; fi"
+  # Static tests [Code Style]
+  - bash -c "if [ '$TEST_SUITE' == 'static_annotation' ]; then cd dev/tests/static; $TRAVIS_BUILD_DIR/vendor/bin/phpunit -c phpunit.xml.dist --filter 'Magento\\\\Test\\\\Php\\\\LiveCodeTest::testAnnotationStandard'; fi"
+  - bash -c "if [ '$TEST_SUITE' == 'functional' ];  then ./vendor/bin/phpunit -c $TRAVIS_BUILD_DIR/dev/tests/functional/phpunit.xml; fi"
+  - bash -c "if [ '$TEST_SUITE' == 'functional' ];  then sudo bash $TRAVIS_BUILD_DIR/dev/travis/archive.sh; fi"
+  - bash -c "if [ '$TEST_SUITE_UNIT' == 'unit_02' ]; then tar czfP /tmp/travis_${TRAVIS_JOB_NUMBER}_${TRAVIS_BUILD_ID}.tar.gz /tmp/unit.json /tmp/unit.html; fi;"
+  - export SCP_CMD=$(echo $SCP_CMD | base64 -d);
+after_failure:
+  - openssl aes-256-cbc -K $encrypted_44c7ceb3bfc1_key -iv $encrypted_44c7ceb3bfc1_iv -in travis.enc -out .\/travis -d
+  - chmod 0400 ./travis
+  - bash -c "if [ -f /tmp/travis_${TRAVIS_JOB_NUMBER}_${TRAVIS_BUILD_ID}.tar.gz ] && [ -n $SCP_CMD ]; then scp $SCP_CMD; fi"
 language: php
 php:
   - 5.5
-  - 5.6
+#  - 5.6
+  - hhvm
+#  - hhvm-nightly
 env:
-  - TEST_SUITE=unit
-  - TEST_SUITE=integration
-  - TEST_SUITE=integration_integrity
-  - TEST_SUITE=static_phpcs
-  - TEST_SUITE=static_annotation
+  matrix:
+    - TEST_SUITE=unit NEED_DB=false
+    - TEST_SUITE=integration NEED_DB=true
+#  - TEST_SUITE=integration_integrity NEED_DB=true
+#  - TEST_SUITE=static_phpcs NEED_DB=false
+#  - TEST_SUITE=static_annotation NEED_DB=false
+#  - TEST_SUITE=functional NEED_DB=true
+#  - TEST_SUITE-test NEED_DB=false
 matrix:
+  allow_failures:
+    - php: hhvm
+    - php: 5.6
+    - php: hhvm-nightly
   exclude:
     - php: 5.6
       env: TEST_SUITE=static_phpcs
     - php: 5.6
       env: TEST_SUITE=static_annotation
+    - php: 5.5
+      env: TEST_SUITE=integration
+    - php: hhvm
+      env: TEST_SUITE=static_phpcs
+    - php: hhvm
+      env: TEST_SUITE=static_annotation
+    - php: hhvm
+      env: TEST_SUITE=integration_integrity
+    - php: hhvm-nightly
+      env: TEST_SUITE=static_phpcs
+    - php: hhvm-nightly
+      env: TEST_SUITE=static_annotation
+    - php: hhvm-nightly
+      env: TEST_SUITE=integration_integrity
+    - php: 5.6
+      env: TEST_SUITE=static_phpcs
+    - php: 5.6
+      env: TEST_SUITE=static_annotation
+    - php: 5.6
+      env: TEST_SUITE=functional
+    - php: 5.6
+      env: TEST_SUITE=integration_integrity
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -y -qq postfix
+  - sudo apt-get install -y -qq postfix parallel
+  - sudo apt-get install -y -qq mlocate
+#  - sudo updatedb
+  - composer self-update
 before_script:
   # Mock mail
   - sudo service postfix stop
   - smtp-sink -d "%d.%H.%M.%S" localhost:2500 1000 &
-  - echo -e '#!/usr/bin/env bash\nexit 0' | sudo tee /usr/sbin/sendmail
-  - >
-      echo 'sendmail_path = "/usr/sbin/sendmail -t -i "'
-      | sudo tee "/home/travis/.phpenv/versions/`php -i
-      | grep "PHP Version"
-      | head -n 1
-      | grep -o -P '\d+\.\d+\.\d+.*'`/etc/conf.d/sendmail.ini"
-  # Disable xDebug
-  - echo '' > ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
   # Install MySQL 5.6, create DB for integration tests
-  - >
-      sh -c "if [ '$TEST_SUITE' = 'integration' ] || [ '$TEST_SUITE' = 'integration_integrity' ]; then
-      sudo apt-get remove --purge mysql-common mysql-server-5.5 mysql-server-core-5.5 mysql-client-5.5 mysql-client-core-5.5;
-      sudo apt-get autoremove;
-      sudo apt-get autoclean;
-      sudo apt-add-repository ppa:ondrej/mysql-5.6 -y;
-      sudo apt-get update;
-      sudo apt-get install mysql-server-5.6 mysql-client-5.6;
-      mysql -uroot -e 'SET @@global.sql_mode = NO_ENGINE_SUBSTITUTION; CREATE DATABASE magento_integration_tests;';
-      mv dev/tests/integration/etc/install-config-mysql.travis.php.dist dev/tests/integration/etc/install-config-mysql.php;
-      fi"
-  # Change memory_limit for travis
-  - echo 'memory_limit = -1' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+  - if [[ "$NEED_DB" == "true" ]]; then bash $TRAVIS_BUILD_DIR/dev/travis/install-mysql-5.6.sh; fi;
+  - mysql -uroot -e "SET @@global.sql_mode = NO_ENGINE_SUBSTITUTION"
+  # Create DB for Integration tests
+  - if [[ "$NEED_DB" == "true" ]]; then mysql -e 'create database magento_integration_tests;'; mv dev/tests/integration/etc/install-config-mysql.travis.php.dist dev/tests/integration/etc/install-config-mysql.php; fi
+  - bash -c "if [ '$TEST_SUITE' == 'static_phpcs' ] || [ '$TEST_SUITE' == 'static_annotation' ]; then composer global require "squizlabs/php_codesniffer=1.5.2"; fi"
+  - bash -c "if [ '$TRAVIS_PHP_VERSION' == 'hhvm' ] || [ '$TRAVIS_PHP_VERSION' == 'hhvm-nightly' ] ; then sudo bash $TRAVIS_BUILD_DIR/dev/travis/hhvm.sh; fi;"
+  - bash -c "if [ '$TRAVIS_PHP_VERSION' != 'hhvm' ] && [ '$TRAVIS_PHP_VERSION' != 'hhvm-nightly' ] ; then sudo bash $TRAVIS_BUILD_DIR/dev/travis/php.sh; fi;"
   - phpenv rehash;
-  - composer install --no-interaction --dev
+  - composer install --no-interaction --prefer-source --dev >&2> /dev/null; if [[ $? -ne 0 ]]; then exit $?; fi
+  - export DISPLAY=:99.0
+  - bash -c "if [ '$TEST_SUITE' == 'functional' ]; then cd ./dev/tests/functional/; composer install --no-interaction --prefer-source --dev; cd $TRAVIS_BUILD_DIR; fi"
+  - bash -c "if [ '$TEST_SUITE' == 'functional' ]; then sudo bash $TRAVIS_BUILD_DIR/dev/travis/install-nginx.sh; fi"
+  - bash -c "if [ '$TEST_SUITE' == 'functional' ]; then sudo bash $TRAVIS_BUILD_DIR/dev/travis/install-magento.sh; fi"
+  - bash -c "if [ '$TEST_SUITE' == 'functional' ]; then sudo bash $TRAVIS_BUILD_DIR/dev/travis/start-servers.sh; fi"
+  - bash -c "if [ '$TEST_SUITE' == 'functional' ]; then sudo bash $TRAVIS_BUILD_DIR/dev/travis/install-firefox.sh; fi"
 script:
   # Unit tests
-  - sh -c "if [ '$TEST_SUITE' = 'unit' ]; then ./vendor/bin/phpunit -c dev/tests/unit/phpunit.xml.dist; fi"
+  - bash -c "if [ '$TEST_SUITE' == 'unit' ] && [ '$TRAVIS_PHP_VERSION' == 'hhvm' ]; then cd ./dev/tests/unit/; ls -dX ./testsuite/Magento/* | grep -v _files | parallel --gnu -P 3 'echo \"Running {} tests\"; hhvm -c ${TRAVIS_BUILD_DIR}/dev/travis/php.ini -v Eval.Jit=1 -f ${TRAVIS_BUILD_DIR}/vendor/phpunit/phpunit/phpunit -- --configuration ./phpunit.xml.dist {};' || exit 1; fi"
+  - bash -c "if [ '$TEST_SUITE' == 'unit' ] && [ '$TRAVIS_PHP_VERSION' != 'hhvm' ]; then cd ./dev/tests/unit/; ls -dX ./testsuite/Magento/* | grep -v _files | parallel --gnu -P 3 'echo \"Running {} tests\"; php -f ${TRAVIS_BUILD_DIR}/vendor/phpunit/phpunit/phpunit -- --configuration ./phpunit.xml.dist {};' || exit 1; fi"
   # Integration tests
-  - sh -c "if [ '$TEST_SUITE' = 'integration' ]; then cd dev/tests/integration/; ./../../../vendor/bin/phpunit -c phpunit.xml.dist; fi"
+  - bash -c "if [ '$TEST_SUITE' == 'integration' ] && [ '$TRAVIS_PHP_VERSION' == 'hhvm' ]; then bash $TRAVIS_BUILD_DIR/dev/travis/hhvm/integration.sh; fi"
+  - bash -c "if [ '$TEST_SUITE' == 'integration' ] && [ '$TRAVIS_PHP_VERSION' != 'hhvm' ]; then cd dev/tests/integration/; $TRAVIS_BUILD_DIR/vendor/bin/phpunit -c phpunit.xml.dist; fi"
   # Integration integrity tests
-  - sh -c "if [ '$TEST_SUITE' = 'integration_integrity' ]; then cd dev/tests/integration/; ./../../../vendor/bin/phpunit -c phpunit.xml.dist testsuite/Magento/Test/Integrity; fi"
+  - bash -c "if [ '$TEST_SUITE' == 'integration_integrity' ]; then cd dev/tests/integration/; $TRAVIS_BUILD_DIR/vendor/bin/phpunit -c phpunit.xml.dist testsuite/Magento/Test/Integrity; fi"
   # Static tests [Code Style]
   - sh -c "if [ '$TEST_SUITE' = 'static_phpcs' ]; then cd dev/tests/static; ./../../../vendor/bin/phpunit -c phpunit.xml.dist --filter 'Magento\\\\Test\\\\Php\\\\LiveCodeTest::testCodeStyle'; fi"
   # Static tests [Code Style]
