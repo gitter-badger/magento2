@@ -48,8 +48,8 @@ matrix:
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y -qq postfix
-  - sudo apt-get install -y -qq mlocate
-  - sudo updatedb
+#  - sudo apt-get install -y -qq mlocate
+#  - sudo updatedb
   - composer self-update
   - chmod a+x $TRAVIS_BUILD_DIR/dev/travis/parallel
 before_script:
