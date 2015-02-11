@@ -2,14 +2,14 @@
 
 export MAX_INSTANCE=4
 export BASE_DIR=$TRAVIS_BUILD_DIR
-export PHPUNIT_COMMAND="hhvm -c $TRAVIS_BUILD_DIR/dev/travis/php.ini -v Eval.Jit=1 $TRAVIS_BUILD_DIR/vendor/phpunit/phpunit/phpunit -- "
+export PHPUNIT_COMMAND=$1
 
 cd $TRAVIS_BUILD_DIR/dev/tests/integration
 for (( i=0; i<$MAX_INSTANCE; i++ )); do
     cat ./phpunit.xml.dist \
     | sed 's#</php>#    <const name="TESTS_PARALLEL_THREAD" value="${i}"/>\n    </php>#' \
     | sed 's#etc/install-config-mysql.php#etc/install-config-mysql-${i}.php#' > ./phpunit-${i}.xml
-    cat etc/install-config-mysql.travis.php | sed 's#magento_integration_tests#magento_integration_tests-${i}#' > etc/install-config-mysql-${i}.php
+    cat ./etc/install-config-mysql.travis.php | sed 's#magento_integration_tests#magento_integration_tests-${i}#' > ./etc/install-config-mysql-${i}.php
     mysql -uroot -e"create database magento_integration_tests-${i};"
 done
 
