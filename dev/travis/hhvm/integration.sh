@@ -1,8 +1,8 @@
 #!/bin/bash
 
 export MAX_INSTANCE=4
-export BASE_DIR=$TRAVIS_BUILD_DIR
 export PHPUNIT_COMMAND=$1
+export BASE_DIR=$2
 
 cd $BASE_DIR/dev/tests/integration
 for (( i=0; i<$MAX_INSTANCE; i++ )); do
@@ -13,7 +13,6 @@ for (( i=0; i<$MAX_INSTANCE; i++ )); do
     mysql -uroot -e"create database magento_integration_tests_${i};"
 done
 rm -f ./phpunit.xml.dist
-cat ./phpunit-1.xml
 
 run_tests() {
     dir=$1
