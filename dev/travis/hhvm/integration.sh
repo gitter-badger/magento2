@@ -23,10 +23,8 @@ run_tests() {
     FOLDER=$(echo $dir | cut -d'/' -f4)
     RESULT="--configuration ${BASE_DIR}/dev/tests/integration/phpunit-${id}.xml --log-junit ${BASE_DIR}/integration_tests_${FOLDER}.xml"
     fl="/tmp/_test_${id}.log"
-    echo -e "\n $PHPUNIT_COMMAND $RESULT $dir \n"
     echo ""
     $PHPUNIT_COMMAND $RESULT $dir | tee $fl
-    ls -l ./tmp/
     cat $fl | grep -i -e fatal -e error > /dev/null && exit 1
     echo ""
 }

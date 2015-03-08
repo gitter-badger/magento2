@@ -8,7 +8,7 @@ env:
   matrix:
 #    - TEST_SUITE=unit NEED_DB=false
     - TEST_SUITE=integration NEED_DB=true
-#  - TEST_SUITE=integration_integrity NEED_DB=true
+    - TEST_SUITE=integration_integrity NEED_DB=true
 #  - TEST_SUITE=static_phpcs NEED_DB=false
 #  - TEST_SUITE=static_annotation NEED_DB=false
 #  - TEST_SUITE=functional NEED_DB=true
@@ -29,8 +29,8 @@ matrix:
       env: TEST_SUITE=static_phpcs
     - php: hhvm
       env: TEST_SUITE=static_annotation
-    - php: hhvm
-      env: TEST_SUITE=integration_integrity
+#    - php: hhvm
+#      env: TEST_SUITE=integration_integrity
     - php: hhvm-nightly
       env: TEST_SUITE=static_phpcs
     - php: hhvm-nightly
@@ -48,9 +48,7 @@ matrix:
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y -qq postfix
-#  - sudo apt-get install -y -qq mlocate
-#  - sudo updatedb
-  - composer self-update
+  - composer self-update --no-interaction
 before_script:
   - chmod a+x $TRAVIS_BUILD_DIR/dev/travis/parallel
   # Mock mail
@@ -74,13 +72,14 @@ before_script:
   - bash -c "if [ '$TEST_SUITE' == 'functional' ]; then sudo bash $TRAVIS_BUILD_DIR/dev/travis/install-firefox.sh; fi"
 script:
   # Unit tests
-  - bash -c "if [ '$TEST_SUITE' == 'unit' ] && [ '$TRAVIS_PHP_VERSION' == 'hhvm' ]; then cd ./dev/tests/unit/; ls -dX ./testsuite/Magento/* | grep -v _files | $TRAVIS_BUILD_DIR/dev/travis/parallel --nn --gnu -P 5 'echo \"Running {} tests\"; hhvm -c ${TRAVIS_BUILD_DIR}/dev/travis/php.ini -v Eval.Jit=1 -f ${TRAVIS_BUILD_DIR}/vendor/phpunit/phpunit/phpunit -- --configuration ./phpunit.xml.dist {};' || exit 1; fi"
+  - bash -c "if [ '$TEST_SUITE' == 'unit' ] && [ '$TRAVIS_PHP_VERSION' == 'hhvm' ]; then cd ./dev/tests/unit/; ls -dX ./testsuite/Magento/* | grep -v _files | $TRAVIS_BUILD_DIR/dev/travis/parallel --nn --gnu -P 5 'echo \"Running {} tests\"; hhvm -c ${TRAVIS_BUILD_DIR}/dev/travis/php.ini -f ${TRAVIS_BUILD_DIR}/vendor/phpunit/phpunit/phpunit -- --configuration ./phpunit.xml.dist {};' || exit 1; fi"
   - bash -c "if [ '$TEST_SUITE' == 'unit' ] && [ '$TRAVIS_PHP_VERSION' != 'hhvm' ]; then cd ./dev/tests/unit/; ls -dX ./testsuite/Magento/* | grep -v _files | $TRAVIS_BUILD_DIR/dev/travis/parallel --nn --gnu -P 5 'echo \"Running {} tests\"; php -f ${TRAVIS_BUILD_DIR}/vendor/phpunit/phpunit/phpunit -- --configuration ./phpunit.xml.dist {};' || exit 1; fi"
   # Integration tests
-  - bash -c "if [ '$TEST_SUITE' == 'integration' ] && [ '$TRAVIS_PHP_VERSION' == 'hhvm' ]; then bash $TRAVIS_BUILD_DIR/dev/travis/hhvm/integration.sh 'hhvm -c $TRAVIS_BUILD_DIR/dev/travis/php.ini -f $TRAVIS_BUILD_DIR/vendor/phpunit/phpunit/phpunit -- ' $TRAVIS_BUILD_DIR; fi"
-  - bash -c "if [ '$TEST_SUITE' == 'integration' ] && [ '$TRAVIS_PHP_VERSION' != 'hhvm' ]; then  $TRAVIS_BUILD_DIR/dev/travis/hhvm/integration.sh '$TRAVIS_BUILD_DIR/vendor/bin/phpunit'; fi"
+  - bash -c "if [ '$TEST_SUITE' == 'integration' ] && [ '$TRAVIS_PHP_VERSION' == 'hhvm' ]; then $TRAVIS_BUILD_DIR/dev/travis/hhvm/integration.sh 'hhvm -c $TRAVIS_BUILD_DIR/dev/travis/php.ini -f $TRAVIS_BUILD_DIR/vendor/phpunit/phpunit/phpunit -- ' $TRAVIS_BUILD_DIR; fi"
+  - bash -c "if [ '$TEST_SUITE' == 'integration' ] && [ '$TRAVIS_PHP_VERSION' != 'hhvm' ]; then $TRAVIS_BUILD_DIR/dev/travis/hhvm/integration.sh 'php -f $TRAVIS_BUILD_DIR/vendor/phpunit/phpunit/phpunit -- ' $TRAVIS_BUILD_DIR; fi"
   # Integration integrity tests
-  - bash -c "if [ '$TEST_SUITE' == 'integration_integrity' ]; then cd dev/tests/integration/; $TRAVIS_BUILD_DIR/vendor/bin/phpunit -c phpunit.xml.dist testsuite/Magento/Test/Integrity; fi"
+  - bash -c "if [ '$TEST_SUITE' == 'integration_integrity' ] && [ '$TRAVIS_PHP_VERSION' != 'hhvm' ]; then cd dev/tests/integration/; $TRAVIS_BUILD_DIR/vendor/bin/phpunit -c phpunit.xml.dist testsuite/Magento/Test/Integrity; fi"
+  - bash -c "if [ '$TEST_SUITE' == 'integration_integrity' ] && [ '$TRAVIS_PHP_VERSION' == 'hhvm' ]; then cd dev/tests/integration/; hhvm -c $TRAVIS_BUILD_DIR/dev/travis/php.ini -f $TRAVIS_BUILD_DIR/vendor/phpunit/phpunit/phpunit -- --configuration phpunit.xml.dist testsuite/Magento/Test/Integrity; fi"
   # Static tests [Code Style]
   - sh -c "if [ '$TEST_SUITE' = 'static_phpcs' ]; then cd dev/tests/static; ./../../../vendor/bin/phpunit -c phpunit.xml.dist --filter 'Magento\\\\Test\\\\Php\\\\LiveCodeTest::testCodeStyle'; fi"
   # Static tests [Code Style]
