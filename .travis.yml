@@ -1,6 +1,6 @@
 language: php
 php:
-#  - 5.5
+  - 5.5
 #  - 5.6
   - hhvm
 #  - hhvm-nightly
@@ -9,10 +9,9 @@ env:
 #    - TEST_SUITE=unit NEED_DB=false
     - TEST_SUITE=integration NEED_DB=true
     - TEST_SUITE=integration_integrity NEED_DB=true
-#  - TEST_SUITE=static_phpcs NEED_DB=false
-#  - TEST_SUITE=static_annotation NEED_DB=false
+    - TEST_SUITE=static_phpcs NEED_DB=false
+    - TEST_SUITE=static_annotation NEED_DB=false
 #  - TEST_SUITE=functional NEED_DB=true
-#  - TEST_SUITE-test NEED_DB=false
 matrix:
   allow_failures:
     - php: hhvm
@@ -25,10 +24,10 @@ matrix:
       env: TEST_SUITE=static_annotation
     - php: 5.5
       env: TEST_SUITE=integration
-    - php: hhvm
-      env: TEST_SUITE=static_phpcs
-    - php: hhvm
-      env: TEST_SUITE=static_annotation
+#    - php: hhvm
+#      env: TEST_SUITE=static_phpcs
+#    - php: hhvm
+#      env: TEST_SUITE=static_annotation
 #    - php: hhvm
 #      env: TEST_SUITE=integration_integrity
     - php: hhvm-nightly
@@ -81,6 +80,8 @@ script:
   - bash -c "if [ '$TEST_SUITE' == 'integration_integrity' ] && [ '$TRAVIS_PHP_VERSION' != 'hhvm' ]; then cd dev/tests/integration/; $TRAVIS_BUILD_DIR/vendor/bin/phpunit -c phpunit.xml.dist testsuite/Magento/Test/Integrity; fi"
   - bash -c "if [ '$TEST_SUITE' == 'integration_integrity' ] && [ '$TRAVIS_PHP_VERSION' == 'hhvm' ]; then cd dev/tests/integration/; hhvm -c $TRAVIS_BUILD_DIR/dev/travis/php.ini -f $TRAVIS_BUILD_DIR/vendor/phpunit/phpunit/phpunit -- --configuration phpunit.xml.dist testsuite/Magento/Test/Integrity; fi"
   # Static tests [Code Style]
-  - sh -c "if [ '$TEST_SUITE' = 'static_phpcs' ]; then cd dev/tests/static; ./../../../vendor/bin/phpunit -c phpunit.xml.dist --filter 'Magento\\\\Test\\\\Php\\\\LiveCodeTest::testCodeStyle'; fi"
+  - sh -c "if [ '$TEST_SUITE' = 'static_phpcs' ] && [ '$TRAVIS_PHP_VERSION' == 'hhvm' ]; then cd dev/tests/static; hhvm -c $TRAVIS_BUILD_DIR/dev/travis/php.ini -f $TRAVIS_BUILD_DIR/vendor/phpunit/phpunit/phpunit -- --configuration phpunit.xml.dist --filter 'Magento\\\\Test\\\\Php\\\\LiveCodeTest::testCodeStyle'; fi"
+  - sh -c "if [ '$TEST_SUITE' = 'static_phpcs' ] && [ '$TRAVIS_PHP_VERSION' != 'hhvm' ]; then cd dev/tests/static; ./../../../vendor/bin/phpunit -c phpunit.xml.dist --filter 'Magento\\\\Test\\\\Php\\\\LiveCodeTest::testCodeStyle'; fi"
   # Static tests [Code Style]
-  - sh -c "if [ '$TEST_SUITE' = 'static_annotation' ]; then cd dev/tests/static; ./../../../vendor/bin/phpunit -c phpunit.xml.dist --filter 'Magento\\\\Test\\\\Php\\\\LiveCodeTest::testAnnotationStandard'; fi"
+  - sh -c "if [ '$TEST_SUITE' = 'static_annotation' ] && [ '$TRAVIS_PHP_VERSION' == 'hhvm' ]; then cd dev/tests/static; hhvm -c $TRAVIS_BUILD_DIR/dev/travis/php.ini -f $TRAVIS_BUILD_DIR/vendor/phpunit/phpunit/phpunit -- --configuration phpunit.xml.dist --filter 'Magento\\\\Test\\\\Php\\\\LiveCodeTest::testAnnotationStandard'; fi"
+  - sh -c "if [ '$TEST_SUITE' = 'static_annotation' ] && [ '$TRAVIS_PHP_VERSION' != 'hhvm' ]; then cd dev/tests/static; ./../../../vendor/bin/phpunit -c phpunit.xml.dist --filter 'Magento\\\\Test\\\\Php\\\\LiveCodeTest::testAnnotationStandard'; fi"
