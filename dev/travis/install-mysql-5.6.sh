@@ -2,6 +2,7 @@
 
 set -e
 PHP_VERSION=$1
+echo $PHP_VERSION
 sudo apt-get remove -qq --purge mysql-common mysql-server-5.5 mysql-server-core-5.5 mysql-client-5.5 mysql-client-core-5.5
 sudo apt-get autoremove -qq
 sudo apt-get autoclean -qq
