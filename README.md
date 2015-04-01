@@ -57,3 +57,6 @@ After verifying your prerequisites, perform the following tasks in order to prep
 	*	<a href="http://devdocs.magento.com/guides/v1.0/install-gde/install/install-web.html">Install Magento software using the web interface</a>
 	*	<a href="http://devdocs.magento.com/guides/v1.0/install-gde/install/install-cli.html">Install Magento software using the command line</a>
 2.	<a href="http://devdocs.magento.com/guides/v1.0/install-gde/install/verify.html">Verify the installation</a>
+
+
+[![Join the chat at https://gitter.im/Sanuch/magento2](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Sanuch/magento2?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
